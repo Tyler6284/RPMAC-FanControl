@@ -12,12 +12,17 @@ Otherwise, don't complain to me, I don't know much about coding.
 I did give it access directly to LibreHardwareMonitor and the FanControl.Releases.Wiki so it wouldn't hallucinate too much.
 
 ## Tested Hardware
-##### MacPro4,1 (Early 2009) running Windows 11 IoT Enterprise LTSC in UEFI mode.
+MacPro4,1 (Early 2009) running Windows 11 IoT Enterprise LTSC in UEFI mode.
+
 MacPro4,1 firmware was upgraded to 5,1 and modified with EnableGOP.ffs injection for UEFI GOP.
-##### Intel(R) Xeon(R) W3520 (8) @ 2.66 GHz
-##### Intel(R) Arc(TM) A750 Graphics
-##### 32GB DDR3 1066 ECC
-##### Samsung SSD 870 EVO 1TB
+
+Intel(R) Xeon(R) W3520 (8) @ 2.66 GHz
+
+Intel(R) Arc(TM) A750 Graphics
+
+32GB DDR3 1066 ECC
+
+Samsung SSD 870 EVO 1TB
 
 ## What it provides
 

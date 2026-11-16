@@ -1,260 +1,81 @@
-# RPMac
+﻿# FanControl.RPMac
 
-**The other app capable of controlling fans on Intel Macs in Windows — for free.**
+Fan Control plugin that exposes **Apple SMC fan sensors, temperature sensors, and fan controls** from RPMAC/`smccore` logic so they can be used inside [Rem0o/FanControl](https://github.com/Rem0o/FanControl.Releases).
 
-RPMac is a free and open-source fan-control utility for **Intel-based Macs running Windows via Boot Camp**. It talks directly to the Mac's **SMC (System Management Controller)** to monitor fan speeds and temperatures, and lets you set each fan to **Automatic**, **Maximum**, or a **custom RPM**. On T2 Macs, it talks to the slightly different SMC interface that the T2 chip exposes, controlling the fans like it would on any non-T2 Mac.
+This lets you use Fan Control's curves, mixing, UI, and profiles while reading/controlling Intel Mac fans through the SMC (Boot Camp).
 
-Designed as a lightweight, modern alternative to paid tools, RPMac includes **hardware safety checks**: it stays read-only on non-Apple hardware and never disables the SMC's built-in thermal protection.
+[RPMAC](https://github.com/golirt1/RPMAC)
 
-## Screenshots
+## Vibe Code Statement
+Unfortunately yes, this was made entirely with AI, but you know what? No one was bothering to make it themselves! At least it works! Remember to run as administrator! If anyone can figure out how to make it not necessary to run as admin, be my guest.
 
-<p align="center">
-  <img src="docs/screenshots/demo.gif" alt="RPMac in action — dragging the temperature curve and moving between pages" width="820">
-</p>
-<p align="center">
-  <sub>Adding a point turns a plain ramp into <b>"stay quiet until 58°, then ramp hard"</b> — double-click to add, drag to shape, right-click to remove. The red dot shows where the fan is running on the curve right now.</sub>
-</p>
+Otherwise, don't complain to me, I don't know much about coding.
 
-<table>
-  <tr>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/main.png" alt="Fan control with the graphical temperature curve" width="410"><br>
-      <sub><b>Fans</b><br>Curve editor, 5-minute history and live temperatures</sub>
-    </td>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/sensors.png" alt="All temperature sensors, grouped" width="410"><br>
-      <sub><b>Sensors</b><br>Grouped by CPU / GPU / system, with the raw SMC key</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/settings.png" alt="Settings, overlay options and themes" width="410"><br>
-      <sub><b>Settings</b><br>Start with Windows · °C/°F · tray mode · overlay · themes</sub>
-    </td>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/light.png" alt="RPMac in the Light theme" width="410"><br>
-      <sub><b>Four themes</b><br>Dark · Light · Nature · Japan, applied instantly</sub>
-    </td>
-  </tr>
-</table>
+I did give it access directly to LibreHardwareMonitor and the FanControl.Releases.Wiki so it wouldn't hallucinate too much.
 
+## Tested Hardware
+Ran on MacPro4,1 (Early 2009) running Windows 11 IoT Enterprise LTSC in UEFI mode.
+MacPro4,1 firmware was upgraded to 5,1 and modified with EnableGOP.ffs injection for UEFI GOP.
+Intel(R) Xeon(R) W3520 (8) @ 2.66 GHz
+Intel(R) Arc(TM) A750 Graphics
+32GB DDR3 1066 ECC
+Samsung SSD 870 EVO 1TB
 
-**On-screen overlay** (FRAPS-style, always on top — works over games in borderless/windowed mode):
+## What it provides
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="docs/screenshots/overlay-vertical.png" alt="Vertical overlay" width="210"><br>
-      <sub><b>Vertical</b></sub>
-    </td>
-    <td align="center">
-      <img src="docs/screenshots/overlay-horizontal.png" alt="Horizontal overlay" width="520"><br>
-      <sub><b>Horizontal (compact)</b></sub>
-    </td>
-  </tr>
-</table>
+- **Fan sensors (RPM):** actual speed for each SMC fan (`F<n>Ac`)
+- **Temperature sensors:** enumerated SMC temperature keys (`T*`) with readable names when known
+- **Control sensors (0–100%):** per-fan control mapped linearly to the fan's SMC min/max RPM
+  - `Set(value)` -> forces manual mode and sets target RPM
+  - `Reset()` -> returns fan to automatic (`F<n>Md` / `FS!` handling via RPMAC core)
+  - Controls are only exposed when `Smc.WritesAllowed` is true (validated Apple SMC)
 
-## Features
-- Real-time fan RPM and temperature monitoring
-- Per-fan control: **Auto / Max / Manual RPM / temperature curve**
-- **Graphical curve editor** — as many points as you want (double-click to add, right-click to remove, drag to shape), with a live dot showing exactly where the fan is running on the curve right now
-- **Curve on the hottest sensor** — instead of picking one sensor, let the fan follow whichever is hottest, so it ramps up when *either* the CPU or the GPU heats up
-- **Smooth fan changes** — ignores tiny temperature wobbles so a curve doesn't make the fan audibly hunt up and down
-- **Emergency cooling** — if any sensor reaches a temperature you set, every fan goes to maximum until it cools down
-- **Emergency shutdown** — for a machine nobody is watching: if the heat holds even with the fans at maximum, or a fan that is being told to spin stays stopped, RPMac tells Windows to shut down cleanly instead of waiting for the CPU to cut power on its own. Off by default, and it never acts on a single reading
-- **Copy a curve to all fans**, rescaled to each fan's own RPM range
-- **5-minute history graph** of temperature and fan speed, plus optional **CSV recording** of every reading
-- **Presets** — save your fan setup as named profiles (e.g. Silent, Gaming) and switch with one click, from the app or the tray icon
-- All sensors grouped by CPU / GPU / system, with their raw SMC keys (plus a full raw view)
-- **Name your own sensors** — if your Mac exposes a sensor RPMac doesn't know, give it a name and it becomes usable everywhere: curves, "Highest temp", overlay, tray and CSV
-- On-screen overlay (FRAPS-style): always-on-top, top-right corner, vertical or horizontal, with selectable fans/sensors
-- Live temperature on the tray icon (highest sensor or a specific one) — or just the app icon, or nothing
-- Themes: Dark / Light / Nature / Japan
-- **Interface languages**: English and Italian — pick one in Settings → Language
-- Temperatures in °C or °F
-- Start with Windows + start minimized to tray
-- Remembers your settings and re-applies them (including after sleep/resume)
-- Command-line tool (`smccore.exe`) for scripting fan control
-- Safety first — read-only unless it confirms a genuine Apple Mac with a valid SMC; clamps RPM to the SMC's own min/max
-- Lightweight native UI — no runtime, no installer, nothing extra to install
-- Free and open source (GPL-2.0)
-
-## Install
-No installer needed — it's a portable app. Although if you want to install it on your system, there is an installer for that.
-The benefit of the installer version is that it automatically launches with the system, adds `smccore.exe` to PATH, and also 
-is harder to accidentally delete.
-
-### Portable Instructions
-1. Go to the [**Releases**](https://github.com/golirt1/RPMAC/releases/latest) page and download `RPMac-v1.10.1-windows.zip` (under **Assets**).
-2. **Unzip it** to any folder you like (e.g. your Desktop). Keep `RPMac.exe`, `RPMac.exe.config`, `smccore.exe` and `inpout32.dll` **together in the same folder**.
-3. **Right-click `RPMac.exe` → "Run as administrator"** (administrator rights are required to access the Mac's hardware/SMC).
-4. Set each fan to **Auto / Max / a custom RPM**. Temperatures update live.
-
-### Installer instructions
-1. Go to the releases as documented above in the portable instructions.
-2. But instead, download the executable with `setup` in its name instead.
-3. Run it and follow the instructions; it should also automatically install the application to the system.
-4. If the app doesn't immediately start, open it up from the start menu.
-5. Use it in the same way as the portable version above.
-
-> **If Windows blocks it:** RPMac is a small open-source app and isn't code-signed (a certificate costs a few hundred dollars a year), so Windows doesn't recognise it yet.
-> - **SmartScreen** ("Windows protected your PC") → **More info → Run anyway**.
-> - **Smart App Control** ("An Application Control policy has blocked this file") → it silently refuses to start. Either turn Smart App Control off in *Windows Security → App & browser control*, or build RPMac yourself from source (see [Build](#build)).
-> - **Antivirus:** RPMac bundles **InpOut32**, a low-level I/O driver needed to talk to the SMC. Some antivirus tools flag this kind of driver as "potentially unwanted" because it grants hardware access — this is normal for fan-control utilities. The full source is in this repo; allow it if your AV blocks it.
->
-> None of this is a sign that something is wrong with the app — it's what happens to any unsigned utility that talks to hardware. Everything RPMac does is in this repository, and you can compile it yourself in a few seconds.
-
-To **uninstall**, just delete the folder. Settings live in `%APPDATA%\RPMac`; if you enabled "Start with Windows", turn that toggle off first (or delete the `RPMac` scheduled task).
-
-## Compatibility
-| Hardware | Status |
-|---|---|
-| Intel Macs (up to 2017) on Boot Camp | Should work (confirmed on MacPro6,1, MacPro3,1, iMac17,1, Macmini3,1, Macmini7,1 and MacBookPro13,2) |
-| Intel Macs with T2 (2018-2020) | **Requires PawnIO Unrestricted <=2.0.1 or >= 2.3.0** — the T2 uses a different SMC interface and needs PawnIO, but the driver has issues involving PawnIO 2.1.0 & 2.2.0 Unrestricted not actually disabling verification |
-| Apple Silicon (M1+) | Not possible (no Boot Camp) |
-| Non-Apple PCs | Read-only (writes are blocked) |
-
-### Tested hardware
-RPMac has been verified on **seven machines**:
-
-- **Mac Pro (Late 2013)** — model identifier `MacPro6,1`
-  - Intel Xeon CPU, dual AMD FirePro GPUs, single centrifugal system fan
-  - SMC fan/sensor values in `fpe2` format, I/O base `0x300`
-- **Mac Pro (2008)** — model identifier `MacPro3,1`
-  - Older Boot Camp in BIOS/CSM mode (where the Windows BIOS strings can be empty or lack "Apple") — RPMac still detects it via the SMC itself
-- **iMac (Retina 5K, 27-inch, Late 2015)** — model identifier `iMac17,1`
-  - Intel Core i5-6500, AMD Radeon R9 M380, Windows 10 (Boot Camp)
-  - Fan control (Auto / Max / Manual / Curve) and temperature sensors both work; reported by a user (thanks @Bibihi98)
-- **Mac mini (Early 2009)** — model identifier `Macmini3,1`
-  - Intel Core 2 Duo, NVIDIA GeForce 9400, single fan — running **Windows 7 Pro SP1**
-  - Manual RPM and temperatures both work; the oldest confirmed machine and the oldest confirmed Windows. Reported by @Mac-Apex
-- **MacBook Pro (16-inch, 2019)** - model identifier `MacBookPro16,1`
-  - Intel Core i9-9880H, AMD Radeon Pro 5500M, dual fan — running **Windows Server 2025 single-booted**
-  - All of the features pretty much work @matthewyang204
-- **MacBook Pro (15-inch, 2018)** — model identifier `MacBookPro15,1`
-  - Intel Core i9-8950HK, AMD Radeon Pro 560X, two fans — T2 chip present
-  - Temperature sensors read correctly; fan control works in all four modes (Auto / Max / Manual / Curve), custom curve behaves properly under load. No SMC read failures, no fan stuck at minimum
-  - Full run (sensor readout, mode switching, manual curve test) recorded on video and attached in the issue. Reported by @Kinkaliyov
-- **Mac mini (Late 2014)** — model identifier `Macmini7,1`
-  - Intel Core i7-4578U, Intel Iris Graphics 5100, single fan — running **Windows 10 IoT Enterprise LTSC 2021**
-  - Everything tried worked, including a custom temperature curve. Reported by @heni0xyz
-- **MacBook Pro (13-inch, Late 2016, Touch Bar)** — model identifier `MacBookPro13,2`
-  - Intel Core i5-6267U, Intel Iris Graphics 550, two fans — running **Windows 10 Home**
-  - Everything worked as intended, with no errors; the first confirmed MacBook without a T2 chip. Reported by @MasterWolff
-
-On all seven machines, reading sensors and controlling the fans (Auto / Max / custom RPM) work correctly.
-
-### Other Intel Macs (untested, but expected to work)
-Beyond the machines above, RPMac has **not** been tested on other Mac models yet. That said, it is built on the **standard Apple SMC interface that is common to virtually all Intel Macs**, and the core auto-detects the number of fans and each key's data format. So it *should* work on most Intel Macs in Boot Camp, with these caveats:
-
-- **Fan control** is the most portable part (it uses standard keys), so it has the highest chance of working everywhere.
-- **Temperature sensor names vary by model**, so on other Macs some labeled sensors may be missing or wrong (use "Show all sensors (raw)" to see everything).
-- **T2 Macs (2018-2020) require PawnIO <=2.0.1 or >=2.3.0**, see why above in the support chart.
-- If the SMC does not respond with plausible values, RPMac **automatically stays read-only** and writes nothing. On a Mac it keeps re-checking every ~10 seconds, so if another program left the SMC stuck at launch, RPMac unlocks itself (restarting quietly) as soon as the SMC answers again — no need to relaunch it by hand. While the SMC is not answering, the status bar says so and RPMac backs off instead of hammering it.
-
-## Help us test it
-
-RPMac has only been verified on a handful of Macs, so **we would really appreciate your help confirming whether it works on yours** — whether it works *or not*. Every report helps build a reliable compatibility list.
-
-Please **open an issue** with:
-
-- **Mac model and year** (e.g. "MacBook Pro 15-inch, 2015")
-- **Model identifier** (e.g. `MacPro6,1`) — find it in macOS under Apple menu > About This Mac > System Report, or on Windows in System Information
-- **CPU and GPU** (e.g. Intel Core i7, AMD Radeon)
-- **Number of fans** RPMac detected
-- **Windows version**
-- **What worked / what didn't** — did fan control (Auto / Max / custom RPM) work? Were the temperatures correct?
-- Any error messages or odd readings (a screenshot is great)
-
-Even a quick "works fine on my iMac 2017" is hugely valuable. Thank you!
-
-## Languages
-
-RPMac's interface is available in **English** and **Italian**. Switch in **Settings → Language**; RPMac restarts to apply it and remembers your choice. The Italian translation was contributed by @Michel-IT.
-
-Want RPMac in your language? Every translated string lives in one file, [`src/gui/I18n.cs`](src/gui/I18n.cs), keyed by the English text — add a dictionary for your language there and a button for it in the Settings selector. Anything left untranslated simply falls back to English. Pull requests are welcome.
-
-## Scripting / command line
-
-The release also includes **`smccore.exe`**, a small command-line tool for the same
-SMC control, so you can drive the fans from scripts, Task Scheduler, etc. Run it from
-an **administrator** terminal, with `inpout32.dll` in the same folder:
-
-```
-smccore.exe list              show all fans (RPM, min, max, target)
-smccore.exe temps             show fans + temperature sensors
-smccore.exe auto              return ALL fans to automatic
-smccore.exe max               force ALL fans to maximum
-smccore.exe set 2000          set ALL fans to 2000 RPM
-smccore.exe auto 0            return fan 0 to automatic
-smccore.exe max 0             force fan 0 to maximum
-smccore.exe set 0 2000        set fan 0 to 2000 RPM
-smccore.exe key TC0D          dump a raw SMC key
-```
-
-Fan numbers are `0 .. N-1` (see `list`). RPM values are clamped to each fan's own
-min/max. Like the GUI, it stays read-only and writes nothing on non-Apple hardware.
-
-> Prefer the GUI? Each fan has a built-in **temperature curve** (the "Curve" button) that
-> ramps RPM between a min and max temperature on a sensor you choose. The command line is
-> there for scripting/automation; you can also build your own ramp with `temps` + `set`.
-
-## How it works
-RPMac uses the public Apple SMC protocol (the same one documented in the Linux `applesmc` driver) over the SMC's I/O ports (`DATA = 0x300`, `CMD = 0x304`), via the InpOut32 ring-0 I/O bridge. It reads and writes standard SMC keys (`FNum`, `F<n>Tg`, `FS! `, temperature `T...` keys) and auto-detects each key's data type (`fpe2`, `flt`, `ui*`, `sp*`, ...).
+Sensors/controls use stable IDs like `RPMac/Fan/0/RPM`, `RPMac/Fan/0/Control`, `RPMac/Temp/TC0P`.
 
 ## Requirements
-- An Intel Mac running Windows (Boot Camp)
-- Administrator rights (required for hardware I/O)
+
+- **Intel Mac running Windows (Boot Camp)** with accessible Apple SMC
+- **Fan Control** (installed/extracted) and **Administrator** privileges
+- `FanControl.Plugins.dll` (from the Fan Control release zip) to compile
+- `inpout32.dll` next to the plugin DLL for legacy I/O-port SMC access
+- For **T2 Macs (2018–2020)**: `AppleT2Smc.bin` (PawnIO module) next to the plugin DLL and PawnIO driver installed (see RPMAC README/T2 notes)
+
+> On non-Apple hardware or if SMC validation fails, the plugin stays read-only/safe and may expose no controls (matching RPMAC safety behavior).
 
 ## Build
-Compiles with the .NET Framework C# compiler already present on Windows — no Visual Studio needed.
 
-The easiest way is the included **`build.bat`** (from the repo root):
-```
-build.bat
-```
-It compiles `RPMac.exe` and `smccore.exe` into `build\` and copies `inpout32.dll` and
-`RPMac.exe.config` next to them.
+No Visual Studio required (uses .NET Framework `csc.exe` shipped with Windows).
 
-To compile `RPMac.exe` by hand instead, from the repo root:
-```
-mkdir build
-csc /noconfig /target:winexe /platform:x86 ^
-    /win32manifest:src\gui\app.manifest ^
-    /out:build\RPMac.exe ^
-    /reference:System.dll ^
-    /reference:System.Core.dll ^
-    /reference:System.Xaml.dll ^
-    /reference:System.Windows.Forms.dll ^
-    /reference:System.Drawing.dll ^
-    /reference:WPF\WindowsBase.dll ^
-    /reference:WPF\PresentationCore.dll ^
-    /reference:WPF\PresentationFramework.dll ^
-    src\gui\Smc.cs src\gui\I18n.cs src\gui\App.cs
-```
-`csc.exe` lives in `%WINDIR%\Microsoft.NET\Framework\v4.0.30319`. Keep `inpout32.dll` and
-`RPMac.exe.config` next to `RPMac.exe` when you run it. (`System.Windows.Forms` and
-`System.Drawing` are required — the tray icon uses them.)
+1. Ensure `FanControl.Plugins.dll` is present at `RPMAC\plugin\FanControl.Plugins.dll`
+   - extracted from [FanControl.zip](https://github.com/Rem0o/FanControl.Releases)
+2. From this folder run:
+   ```bat
+   build.bat
+   ```
+3. Output: `build\FanControl.RPMac.dll` (+ copied `inpout32.dll`, `AppleT2Smc.bin` if available)
+
+The build compiles `..\src\gui\Smc.cs` (RPMAC SMC core) together with the plugin so no separate RPMAC runtime is needed.
+
+## Install
+
+1. Close Fan Control.
+2. Copy **all files** from `FanControl.RPMac\build\` into Fan Control's `Plugins\` folder:
+   - `FanControl.RPMac.dll`
+   - `inpout32.dll`
+   - `AppleT2Smc.bin` (for T2 Macs)
+3. Start **Fan Control as Administrator**.
+4. Open *Sensors* / *Refresh detection* in Fan Control; RPMac sensors/controls should appear (names prefixed with `RPMac`).
+
+To uninstall, remove those files from `Plugins\`.
+
+## Notes / behavior
+
+- Plugin calls `Smc.Validate()` on initialize and respects `WritesAllowed` (won't write to non-Apple/invalid SMC).
+- On `Close`/refresh it resets any controlled fans to **automatic** and cleans up SMC/PawnIO resources.
+- Control value is a **percentage of the fan's reported min/max RPM**; actual achievable RPM depends on hardware/SMC.
+- SMC access is serialized (global mutex in core) to reduce contention with other SMC tools, but avoid running multiple SMC writers simultaneously.
+- This plugin focuses on fan/temp/control integration; RPMAC GUI features (curves/overlay/presets/logging) remain in the RPMAC app.
 
 ## License
-**GPL-2.0-only.** See `LICENSE`.
 
-RPMac's SMC code is derived from the Linux `applesmc` driver and smcFanControl — see `NOTICE` for credits. InpOut32 is bundled under the MIT license.
-
-## Credits
-- `applesmc.c` (Linux): Nicolas Boichat, Henrik Rydberg
-- smcFanControl: Hendrik Holtmann
-- InpOut32: Phillip Gibbons
-
-## Disclaimer — no warranty
-
-RPMac is provided **"AS IS", without warranty of any kind**, express or implied, including but not limited to the warranties of merchantability and fitness for a particular purpose, as stated in the GNU GPL-2.0.
-
-- **There is no guarantee that it will work on your Mac.** It has only been tested on the few models listed above.
-- **You use this software entirely at your own risk.**
-- The author and contributors are **not responsible or liable for any damage** of any kind — including but not limited to overheating, throttling, hardware failure, data loss, or any other problem — arising from the use or misuse of this software.
-
-Notes on safety:
-- Running the fan at maximum is safe for the hardware itself, but **constant maximum speed increases noise, dust buildup and bearing wear** over time.
-- RPMac **never disables the SMC's built-in hardware thermal protection** — the SMC can still override the fans and throttle or shut down the machine to prevent overheating.
-- Setting a fan too low under heavy load could let the machine run hot; RPMac clamps manual values to the SMC's own minimum/maximum, but use manual mode with care.
+RPMAC-derived code in this plugin is **GPL-2.0-only** (see `../LICENSE`, `../NOTICE`). Ensure compatibility with Fan Control's plugin distribution terms for your use case.

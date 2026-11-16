@@ -26,6 +26,9 @@ Intel(R) Arc(TM) A750 Graphics
 
 Samsung SSD 870 EVO 1TB
 
+## Tested Software
+Fan Control V285 (.NET Framework 4.8 version)
+
 ## What it provides
 
 - **Fan sensors (RPM):** actual speed for each SMC fan (`F<n>Ac`)

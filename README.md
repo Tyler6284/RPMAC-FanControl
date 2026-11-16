@@ -87,3 +87,7 @@ To uninstall, remove those files from `Plugins\`.
 ## License
 
 RPMAC-derived code in this plugin is **GPL-2.0-only** (see `../LICENSE`, `../NOTICE`). Ensure compatibility with Fan Control's plugin distribution terms for your use case.
+
+## What?!
+
+What are you doing down here?! There's nothing for you! Go home! Or download the software! I don't know! Stop searching for things, you nosy person you!

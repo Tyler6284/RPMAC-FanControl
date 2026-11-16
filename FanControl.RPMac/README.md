@@ -4,6 +4,23 @@ Fan Control plugin that exposes **Apple SMC fan sensors, temperature sensors, an
 
 This lets you use Fan Control's curves, mixing, UI, and profiles while reading/controlling Intel Mac fans through the SMC (Boot Camp).
 
+[RPMAC](https://github.com/golirt1/RPMAC)
+
+## Vibe Code Statement
+Unfortunately yes, this was made entirely with AI, but you know what? No one was bothering to make it themselves! At least it works! Remember to run as administrator! If anyone can figure out how to make it not necessary to run as admin, be my guest.
+
+Otherwise, don't complain to me, I don't know much about coding.
+
+I did give it access directly to LibreHardwareMonitor and the FanControl.Releases.Wiki so it wouldn't hallucinate too much.
+
+## Tested Hardware
+Ran on MacPro4,1 (Early 2009) running Windows 11 IoT Enterprise LTSC in UEFI mode.
+MacPro4,1 firmware was upgraded to 5,1 and modified with EnableGOP.ffs injection for UEFI GOP.
+Intel(R) Xeon(R) W3520 (8) @ 2.66 GHz
+Intel(R) Arc(TM) A750 Graphics
+32GB DDR3 1066 ECC
+Samsung SSD 870 EVO 1TB
+
 ## What it provides
 
 - **Fan sensors (RPM):** actual speed for each SMC fan (`F<n>Ac`)

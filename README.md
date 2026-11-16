@@ -13,6 +13,10 @@ If anyone can figure out how to make it not necessary to run as admin, be my gue
 
 I did give it access directly to local clones of the LibreHardwareMonitor and the FanControl.Releases.Wiki repositories so it wouldn't hallucinate too much.
 
+## DISCLAIMER
+
+### I AM NOT RESPONSIBLE IF YOU SCREW UP YOUR HARDWARE! USE COMMON SENSE.
+
 ## Tested Hardware
 MacPro4,1 (Early 2009) running Windows 11 IoT Enterprise LTSC in UEFI mode.
 

@@ -9,7 +9,7 @@ Unfortunately yes, this was made entirely with AI, but you know what? No one was
 
 Otherwise, don't complain to me, I don't know much about coding.
 
-I did give it access directly to LibreHardwareMonitor and the FanControl.Releases.Wiki so it wouldn't hallucinate too much.
+I did give it access directly to local clones of the LibreHardwareMonitor and the FanControl.Releases.Wiki repositories so it wouldn't hallucinate too much.
 
 ## Tested Hardware
 MacPro4,1 (Early 2009) running Windows 11 IoT Enterprise LTSC in UEFI mode.

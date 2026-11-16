@@ -5,9 +5,11 @@ Fan Control plugin that exposes **Apple SMC fan sensors, temperature sensors, an
 This lets you use Fan Control's curves, mixing, UI, and profiles while reading/controlling Intel Mac fans through the SMC (Boot Camp).
 
 ## Vibe Code Statement
-Unfortunately yes, this was made entirely with AI, but you know what? No one was bothering to make it themselves! At least it works! Remember to run as administrator! If anyone can figure out how to make it not necessary to run as admin, be my guest.
+Unfortunately yes, this was made entirely with AI, but you know what? No one was bothering to make it themselves! At least it works! 
 
-Otherwise, don't complain to me, I don't know much about coding.
+Remember to run as administrator! 
+
+If anyone can figure out how to make it not necessary to run as admin, be my guest. Otherwise, don't complain to me, I don't know much about coding.
 
 I did give it access directly to local clones of the LibreHardwareMonitor and the FanControl.Releases.Wiki repositories so it wouldn't hallucinate too much.
 
